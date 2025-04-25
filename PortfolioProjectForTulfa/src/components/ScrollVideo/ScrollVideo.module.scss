@@ -1,16 +1,12 @@
 @use "../../utils/mixins.scss" as *;
 
-.video__wrapper {
-  width: 100%;
-  height: 856px;
+.vid {
+    height: 5000px;
+}
 
-  @include screen-width(tablet) {
-    height: 542px;
-  }
-
-  @include screen-width(desktop) {
-    height: 832px;
-  }
+.holder {
+  position: sticky;
+  top: 0;
 }
 
 .video {

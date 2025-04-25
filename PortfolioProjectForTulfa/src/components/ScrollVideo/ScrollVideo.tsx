@@ -1,59 +1,49 @@
-import { useEffect, useRef, useState } from "react";
 import styles from "./ScrollVideo.module.scss";
-import video from "../../assets/Banner Video/aerial-video-of-the-sunrise-in-the-dolomites-mount-2023-11-27-05-26-37-utc.mp4";
+import video from "../../assets/Banner Video/aerial-compressed.mp4";
+import { useEffect, useRef } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 export const ScrollVideo = () => {
-  const [isHovering, setIsHovering] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const video = videoRef.current;
-    const wrapper = wrapperRef.current;
-    if (!video || !wrapper) return;
+    AOS.init({ duration: 1000 });
+  }, []);
 
-    const handleScrollOrVisibility = () => {
-      if (isHovering && document.visibilityState === "visible") {
-        video.play().catch(() => {});
-      } else {
-        video.pause();
+  useEffect(() => {
+    const handleScroll = () => {
+      const video = videoRef.current;
+      const section = sectionRef.current;
+      if (!video || !section) return;
+
+      const distance = window.scrollY - section.offsetTop;
+      const total = section.clientHeight - window.innerHeight;
+
+      let percentage = distance / total;
+      percentage = Math.max(0, Math.min(percentage, 1));
+
+      if (video.duration > 0) {
+        video.currentTime = video.duration * percentage;
       }
     };
 
-    const handleEnter = () => setIsHovering(true);
-    const handleLeave = () => {
-      setIsHovering(false);
-      video.pause();
-    };
-
-    window.addEventListener("scroll", handleScrollOrVisibility);
-    document.addEventListener("visibilitychange", handleScrollOrVisibility);
-    wrapper.addEventListener("mouseenter", handleEnter);
-    wrapper.addEventListener("mouseleave", handleLeave);
-
-    return () => {
-      window.removeEventListener("scroll", handleScrollOrVisibility);
-      document.removeEventListener(
-        "visibilitychange",
-        handleScrollOrVisibility
-      );
-      wrapper.removeEventListener("mouseenter", handleEnter);
-      wrapper.removeEventListener("mouseleave", handleLeave);
-    };
-  }, [isHovering]);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <>
-      <div ref={wrapperRef} className={styles.video__wrapper}>
+    <section className={styles.vid} ref={sectionRef} data-aos="zoom-out">
+      <div className={styles.holder}>
         <video
           ref={videoRef}
           src={video}
           muted
           playsInline
           className={styles.video}
-          width={"100%"}
         />
       </div>
-    </>
+    </section>
   );
 };
